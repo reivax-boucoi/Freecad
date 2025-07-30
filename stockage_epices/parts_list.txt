@@ -1,0 +1,5 @@
+2x sides
+3x front
+3x bot
+1x top
+5x back
