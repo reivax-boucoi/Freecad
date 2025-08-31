@@ -1,4 +1,4 @@
-### Split flap counter project
+# Split flap counter project
 
 This project started as a joke, to display the "number of consecutive days without incident", as we were blowing up chips regularly in the lab.
 
@@ -7,19 +7,23 @@ Each day, the counter increments by 1. When a "happy little accident" occurs, si
 
 This project was developped in a couple days, mixing 3D printing, electronics and minimal code.
 
-### Hardware
-#### Mechanicals
+## Hardware
+
+### Mechanicals
+
 The hardware was designed using Freecad for the mechanical part 
 
 It uses multimaterial printing for the digit flaps, and regular PLA prints for the rest. The 2 wheels consist of mirrored parts facing each other, the assembly providing overall support of the drums.
 2 stepper motors are used: 28BYJ-48, which are dirt cheap and run of 5V directly. They have a resolution of 2048 steps per turn (in full step mode) and are driven at ~5RPM, i.e. ~12s to complete a revolution. Sliding lever microswitches provide zeroing on each wheel.
+The printable parts are:
+- 2x 
 Additionnal hardware required:
 - 2x 28-BYJ-48 5V stepper motors
 - 4x M2x10 screws for the limit switches
 - 4x M3x8 screws for the motor mount
 - 2x limit switches: mine were salvaged from an old industrial grade printer, I don't have the reference, they are similar to Alps SSCTL10400.
 
-#### Electronics
+### Electronics
 
 Kicad 8.0 was used for the electronics (schematic and placement), although the circuit was manually assembled using dead-bug technique later on,because of it's simplicity.
 The project is powered by a 5V supply (>500mA required), which could be ageneric USB wall charger.
