@@ -1,0 +1,377 @@
+   1               		.file	"main.c"
+   2               	__SP_L__ = 0x3d
+   3               	__SREG__ = 0x3f
+   4               	__tmp_reg__ = 0
+   5               	__zero_reg__ = 1
+   6               		.text
+   7               	.Ltext0:
+   8               		.cfi_sections	.debug_frame
+   9               		.section	.text.startup,"ax",@progbits
+  10               	.global	main
+  12               	main:
+  13               	.LFB0:
+  14               		.file 1 "main.c"
+   1:main.c        **** #include <avr/io.h>
+   2:main.c        **** #include<avr/interrupt.h>
+   3:main.c        **** 
+   4:main.c        **** #define LEDG_HIGH (PORTD |= 1<<PIND4)
+   5:main.c        **** #define LEDG_LOW (PORTD &=~(1<<PIND4))
+   6:main.c        **** #define LEDG_TOGGLE (PORTD ^=(1<<PIND4))
+   7:main.c        **** 
+   8:main.c        **** #define LEDR_HIGH (PORTD |= 1<<PIND5)
+   9:main.c        **** #define LEDR_LOW (PORTD &=~(1<<PIND5))
+  10:main.c        **** #define LEDR_TOGGLE (PORTD ^=(1<<PIND5))
+  11:main.c        **** 
+  12:main.c        **** volatile uint8_t stepperState=0;
+  13:main.c        **** volatile uint16_t remainingSteps=2048;
+  14:main.c        **** 
+  15:main.c        **** int main(void){
+  15               		.loc 1 15 0
+  16               		.cfi_startproc
+  17               	/* prologue: function */
+  18               	/* frame size = 0 */
+  19               	/* stack size = 0 */
+  20               	.L__stack_usage = 0
+  16:main.c        ****     DDRD |= (1 << PIND4) ; //LEDG init
+  21               		.loc 1 16 0
+  22 0000 8C9A      		sbi 0x11,4
+  17:main.c        ****     DDRB |= (1 << PIND5) ; //LEDR init
+  23               		.loc 1 17 0
+  24 0002 BD9A      		sbi 0x17,5
+  18:main.c        ****     DDRD&=~((1<<PIND2) | (1<<PIND3));  //INT0 & INT1 init
+  25               		.loc 1 18 0
+  26 0004 81B3      		in r24,0x11
+  27 0006 837F      		andi r24,lo8(-13)
+  28 0008 81BB      		out 0x11,r24
+  19:main.c        ****     DDRB=0xFF;
+  29               		.loc 1 19 0
+  30 000a 8FEF      		ldi r24,lo8(-1)
+  31 000c 87BB      		out 0x17,r24
+  20:main.c        ****     PORTB=0;
+  32               		.loc 1 20 0
+  33 000e 18BA      		out 0x18,__zero_reg__
+  21:main.c        ****     LEDG_LOW;
+  34               		.loc 1 21 0
+  35 0010 9498      		cbi 0x12,4
+  22:main.c        ****     LEDR_LOW;
+  36               		.loc 1 22 0
+  37 0012 9598      		cbi 0x12,5
+  23:main.c        **** 
+  24:main.c        ****     
+  25:main.c        ****     OCR0A = 150; //~400Hz
+  38               		.loc 1 25 0
+  39 0014 86E9      		ldi r24,lo8(-106)
+  40 0016 86BF      		out 0x36,r24
+  26:main.c        ****     OCR1A = 62499; // 4s
+  41               		.loc 1 26 0
+  42 0018 83E2      		ldi r24,lo8(35)
+  43 001a 94EF      		ldi r25,lo8(-12)
+  44 001c 9BBD      		out 0x2a+1,r25
+  45 001e 8ABD      		out 0x2a,r24
+  27:main.c        **** 
+  28:main.c        **** 
+  29:main.c        ****     TCCR0A = (1 << WGM01);
+  46               		.loc 1 29 0
+  47 0020 82E0      		ldi r24,lo8(2)
+  48 0022 80BF      		out 0x30,r24
+  30:main.c        ****     TCCR0B = (1 << CS02);// prescaler 256, clear timer on OCR0A match
+  49               		.loc 1 30 0
+  50 0024 84E0      		ldi r24,lo8(4)
+  51 0026 83BF      		out 0x33,r24
+  31:main.c        ****     TCCR1B |= (1 << WGM12) | (1 << CS12) | (1 << CS10);// prescaler 1024, clear timer on OCR1A matc
+  52               		.loc 1 31 0
+  53 0028 8EB5      		in r24,0x2e
+  54 002a 8D60      		ori r24,lo8(13)
+  55 002c 8EBD      		out 0x2e,r24
+  32:main.c        ****     TIMSK |= (1 << OCIE1A) | (1 << OCIE0A);
+  56               		.loc 1 32 0
+  57 002e 89B7      		in r24,0x39
+  58 0030 8164      		ori r24,lo8(65)
+  59 0032 89BF      		out 0x39,r24
+  33:main.c        ****     GIMSK |= (1<<INT1) | (1<<INT0);
+  60               		.loc 1 33 0
+  61 0034 8BB7      		in r24,0x3b
+  62 0036 806C      		ori r24,lo8(-64)
+  63 0038 8BBF      		out 0x3b,r24
+  34:main.c        ****     MCUCR |=(1<<ISC11) | (1<<ISC01);//falling edge of INT1 generates interrupt
+  64               		.loc 1 34 0
+  65 003a 85B7      		in r24,0x35
+  66 003c 8A60      		ori r24,lo8(10)
+  67 003e 85BF      		out 0x35,r24
+  35:main.c        ****     sei();
+  68               		.loc 1 35 0
+  69               	/* #APP */
+  70               	 ;  35 "main.c" 1
+  71 0040 7894      		sei
+  72               	 ;  0 "" 2
+  73               	/* #NOAPP */
+  74               	.L2:
+  75 0042 00C0      		rjmp .L2
+  76               		.cfi_endproc
+  77               	.LFE0:
+  79               		.text
+  80               	.global	__vector_1
+  82               	__vector_1:
+  83               	.LFB1:
+  36:main.c        **** 
+  37:main.c        ****     while(1){
+  38:main.c        ****     }
+  39:main.c        ****     return 0;
+  40:main.c        **** }     
+  41:main.c        **** 
+  42:main.c        **** ISR (INT0_vect){
+  84               		.loc 1 42 0
+  85               		.cfi_startproc
+  86 0000 1F92      		push r1
+  87               	.LCFI0:
+  88               		.cfi_def_cfa_offset 3
+  89               		.cfi_offset 1, -2
+  90 0002 0F92      		push r0
+  91               	.LCFI1:
+  92               		.cfi_def_cfa_offset 4
+  93               		.cfi_offset 0, -3
+  94 0004 0FB6      		in r0,__SREG__
+  95 0006 0F92      		push r0
+  96 0008 1124      		clr __zero_reg__
+  97 000a 8F93      		push r24
+  98               	.LCFI2:
+  99               		.cfi_def_cfa_offset 5
+ 100               		.cfi_offset 24, -4
+ 101 000c 9F93      		push r25
+ 102               	.LCFI3:
+ 103               		.cfi_def_cfa_offset 6
+ 104               		.cfi_offset 25, -5
+ 105               	/* prologue: Signal */
+ 106               	/* frame size = 0 */
+ 107               	/* stack size = 5 */
+ 108               	.L__stack_usage = 5
+  43:main.c        ****         remainingSteps+=205;
+ 109               		.loc 1 43 0
+ 110 000e 8091 0000 		lds r24,remainingSteps
+ 111 0012 9091 0000 		lds r25,remainingSteps+1
+ 112 0016 8353      		subi r24,51
+ 113 0018 9F4F      		sbci r25,-1
+ 114 001a 9093 0000 		sts remainingSteps+1,r25
+ 115 001e 8093 0000 		sts remainingSteps,r24
+  44:main.c        ****         LEDR_HIGH;
+ 116               		.loc 1 44 0
+ 117 0022 959A      		sbi 0x12,5
+ 118               	/* epilogue start */
+  45:main.c        **** 
+  46:main.c        **** }
+ 119               		.loc 1 46 0
+ 120 0024 9F91      		pop r25
+ 121 0026 8F91      		pop r24
+ 122 0028 0F90      		pop r0
+ 123 002a 0FBE      		out __SREG__,r0
+ 124 002c 0F90      		pop r0
+ 125 002e 1F90      		pop r1
+ 126 0030 1895      		reti
+ 127               		.cfi_endproc
+ 128               	.LFE1:
+ 130               	.global	__vector_2
+ 132               	__vector_2:
+ 133               	.LFB2:
+  47:main.c        **** 
+  48:main.c        **** ISR (INT1_vect){
+ 134               		.loc 1 48 0
+ 135               		.cfi_startproc
+ 136 0032 1F92      		push r1
+ 137               	.LCFI4:
+ 138               		.cfi_def_cfa_offset 3
+ 139               		.cfi_offset 1, -2
+ 140 0034 0F92      		push r0
+ 141               	.LCFI5:
+ 142               		.cfi_def_cfa_offset 4
+ 143               		.cfi_offset 0, -3
+ 144 0036 0FB6      		in r0,__SREG__
+ 145 0038 0F92      		push r0
+ 146 003a 1124      		clr __zero_reg__
+ 147 003c 8F93      		push r24
+ 148               	.LCFI6:
+ 149               		.cfi_def_cfa_offset 5
+ 150               		.cfi_offset 24, -4
+ 151 003e 9F93      		push r25
+ 152               	.LCFI7:
+ 153               		.cfi_def_cfa_offset 6
+ 154               		.cfi_offset 25, -5
+ 155               	/* prologue: Signal */
+ 156               	/* frame size = 0 */
+ 157               	/* stack size = 5 */
+ 158               	.L__stack_usage = 5
+  49:main.c        ****     LEDG_TOGGLE;
+ 159               		.loc 1 49 0
+ 160 0040 82B3      		in r24,0x12
+ 161 0042 90E1      		ldi r25,lo8(16)
+ 162 0044 8927      		eor r24,r25
+ 163 0046 82BB      		out 0x12,r24
+ 164               	/* epilogue start */
+  50:main.c        **** }
+ 165               		.loc 1 50 0
+ 166 0048 9F91      		pop r25
+ 167 004a 8F91      		pop r24
+ 168 004c 0F90      		pop r0
+ 169 004e 0FBE      		out __SREG__,r0
+ 170 0050 0F90      		pop r0
+ 171 0052 1F90      		pop r1
+ 172 0054 1895      		reti
+ 173               		.cfi_endproc
+ 174               	.LFE2:
+ 176               	.global	__vector_4
+ 178               	__vector_4:
+ 179               	.LFB3:
+  51:main.c        **** 
+  52:main.c        **** 
+  53:main.c        **** ISR (TIMER1_COMPA_vect){
+ 180               		.loc 1 53 0
+ 181               		.cfi_startproc
+ 182 0056 1F92      		push r1
+ 183               	.LCFI8:
+ 184               		.cfi_def_cfa_offset 3
+ 185               		.cfi_offset 1, -2
+ 186 0058 0F92      		push r0
+ 187               	.LCFI9:
+ 188               		.cfi_def_cfa_offset 4
+ 189               		.cfi_offset 0, -3
+ 190 005a 0FB6      		in r0,__SREG__
+ 191 005c 0F92      		push r0
+ 192 005e 1124      		clr __zero_reg__
+ 193               	/* prologue: Signal */
+ 194               	/* frame size = 0 */
+ 195               	/* stack size = 3 */
+ 196               	.L__stack_usage = 3
+ 197               	/* epilogue start */
+  54:main.c        **** }
+ 198               		.loc 1 54 0
+ 199 0060 0F90      		pop r0
+ 200 0062 0FBE      		out __SREG__,r0
+ 201 0064 0F90      		pop r0
+ 202 0066 1F90      		pop r1
+ 203 0068 1895      		reti
+ 204               		.cfi_endproc
+ 205               	.LFE3:
+ 207               	.global	__vector_13
+ 209               	__vector_13:
+ 210               	.LFB4:
+  55:main.c        **** 
+  56:main.c        **** ISR(TIMER0_COMPA_vect){
+ 211               		.loc 1 56 0
+ 212               		.cfi_startproc
+ 213 006a 1F92      		push r1
+ 214               	.LCFI10:
+ 215               		.cfi_def_cfa_offset 3
+ 216               		.cfi_offset 1, -2
+ 217 006c 0F92      		push r0
+ 218               	.LCFI11:
+ 219               		.cfi_def_cfa_offset 4
+ 220               		.cfi_offset 0, -3
+ 221 006e 0FB6      		in r0,__SREG__
+ 222 0070 0F92      		push r0
+ 223 0072 1124      		clr __zero_reg__
+ 224 0074 2F93      		push r18
+ 225               	.LCFI12:
+ 226               		.cfi_def_cfa_offset 5
+ 227               		.cfi_offset 18, -4
+ 228 0076 8F93      		push r24
+ 229               	.LCFI13:
+ 230               		.cfi_def_cfa_offset 6
+ 231               		.cfi_offset 24, -5
+ 232 0078 9F93      		push r25
+ 233               	.LCFI14:
+ 234               		.cfi_def_cfa_offset 7
+ 235               		.cfi_offset 25, -6
+ 236               	/* prologue: Signal */
+ 237               	/* frame size = 0 */
+ 238               	/* stack size = 6 */
+ 239               	.L__stack_usage = 6
+  57:main.c        ****     if(remainingSteps>0){
+ 240               		.loc 1 57 0
+ 241 007a 8091 0000 		lds r24,remainingSteps
+ 242 007e 9091 0000 		lds r25,remainingSteps+1
+ 243 0082 892B      		or r24,r25
+ 244 0084 01F0      		breq .L7
+  58:main.c        ****         remainingSteps--;
+ 245               		.loc 1 58 0
+ 246 0086 8091 0000 		lds r24,remainingSteps
+ 247 008a 9091 0000 		lds r25,remainingSteps+1
+ 248 008e 0197      		sbiw r24,1
+ 249 0090 9093 0000 		sts remainingSteps+1,r25
+ 250 0094 8093 0000 		sts remainingSteps,r24
+  59:main.c        ****         if(--stepperState>3)stepperState=3;
+ 251               		.loc 1 59 0
+ 252 0098 8091 0000 		lds r24,stepperState
+ 253 009c 8150      		subi r24,lo8(-(-1))
+ 254 009e 8093 0000 		sts stepperState,r24
+ 255 00a2 8430      		cpi r24,lo8(4)
+ 256 00a4 00F0      		brlo .L8
+ 257               		.loc 1 59 0 is_stmt 0 discriminator 1
+ 258 00a6 83E0      		ldi r24,lo8(3)
+ 259 00a8 8093 0000 		sts stepperState,r24
+ 260               	.L8:
+  60:main.c        ****         PORTB=1<<stepperState;
+ 261               		.loc 1 60 0 is_stmt 1
+ 262 00ac 2091 0000 		lds r18,stepperState
+ 263 00b0 81E0      		ldi r24,lo8(1)
+ 264 00b2 90E0      		ldi r25,0
+ 265 00b4 00C0      		rjmp 2f
+ 266               		1:
+ 267 00b6 880F      		lsl r24
+ 268               		2:
+ 269 00b8 2A95      		dec r18
+ 270 00ba 02F4      		brpl 1b
+ 271 00bc 88BB      		out 0x18,r24
+ 272               	.L6:
+ 273               	/* epilogue start */
+  61:main.c        ****     }else{
+  62:main.c        ****         PORTB=0;
+  63:main.c        ****         LEDR_LOW;
+  64:main.c        ****     }
+  65:main.c        **** }
+ 274               		.loc 1 65 0
+ 275 00be 9F91      		pop r25
+ 276 00c0 8F91      		pop r24
+ 277 00c2 2F91      		pop r18
+ 278 00c4 0F90      		pop r0
+ 279 00c6 0FBE      		out __SREG__,r0
+ 280 00c8 0F90      		pop r0
+ 281 00ca 1F90      		pop r1
+ 282 00cc 1895      		reti
+ 283               	.L7:
+  62:main.c        ****         LEDR_LOW;
+ 284               		.loc 1 62 0
+ 285 00ce 18BA      		out 0x18,__zero_reg__
+  63:main.c        ****     }
+ 286               		.loc 1 63 0
+ 287 00d0 9598      		cbi 0x12,5
+ 288               		.loc 1 65 0
+ 289 00d2 00C0      		rjmp .L6
+ 290               		.cfi_endproc
+ 291               	.LFE4:
+ 293               	.global	remainingSteps
+ 294               		.data
+ 297               	remainingSteps:
+ 298 0000 0008      		.word	2048
+ 299               	.global	stepperState
+ 300               		.section .bss
+ 303               	stepperState:
+ 304 0000 00        		.zero	1
+ 305               		.text
+ 306               	.Letext0:
+ 307               		.file 2 "/usr/lib/avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+     /tmp/cchs3wms.s:2      *ABS*:000000000000003d __SP_L__
+     /tmp/cchs3wms.s:3      *ABS*:000000000000003f __SREG__
+     /tmp/cchs3wms.s:4      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/cchs3wms.s:5      *ABS*:0000000000000001 __zero_reg__
+     /tmp/cchs3wms.s:12     .text.startup:0000000000000000 main
+     /tmp/cchs3wms.s:82     .text:0000000000000000 __vector_1
+     /tmp/cchs3wms.s:297    .data:0000000000000000 remainingSteps
+     /tmp/cchs3wms.s:132    .text:0000000000000032 __vector_2
+     /tmp/cchs3wms.s:178    .text:0000000000000056 __vector_4
+     /tmp/cchs3wms.s:209    .text:000000000000006a __vector_13
+     /tmp/cchs3wms.s:303    .bss:0000000000000000 stepperState
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
