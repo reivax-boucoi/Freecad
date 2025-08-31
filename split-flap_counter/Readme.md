@@ -15,8 +15,13 @@ The hardware was designed using Freecad for the mechanical part
 
 It uses multimaterial printing for the digit flaps, and regular PLA prints for the rest. The 2 wheels consist of mirrored parts facing each other, the assembly providing overall support of the drums.
 2 stepper motors are used: 28BYJ-48, which are dirt cheap and run of 5V directly. They have a resolution of 2048 steps per turn (in full step mode) and are driven at ~5RPM, i.e. ~12s to complete a revolution. Sliding lever microswitches provide zeroing on each wheel.
-The printable parts are:
-- 2x 
+The printable parts are located in *"split-flap_counter/Mechanical/3mF_exports_toPrint"* :
+- 2x Drum
+- 2x Drum_end
+- 2x Frame (1 normal, 1 mirrored)
+- 1x JointKey
+- 1x JointShfat
+- 2x sets of 5 dual sided flaps
 Additionnal hardware required:
 - 2x 28-BYJ-48 5V stepper motors
 - 4x M2x10 screws for the limit switches
