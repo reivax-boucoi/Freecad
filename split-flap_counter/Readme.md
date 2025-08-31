@@ -21,7 +21,8 @@ The printable parts are located in *"split-flap_counter/Mechanical/3mF_exports_t
 - 2x Frame (1 normal, 1 mirrored)
 - 1x JointKey
 - 1x JointShfat
-- 2x sets of 5 dual sided flaps
+- 2x sets of 5 dual sided flaps  
+
 Additionnal hardware required:
 - 2x 28-BYJ-48 5V stepper motors
 - 4x M2x10 screws for the limit switches
