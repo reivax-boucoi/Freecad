@@ -23,6 +23,7 @@ The individual printable parts are located in [/Mechanical/3mF_exports_toPrint/]
 - 1x **JointKey**
 - 1x **JointShaft**
 - 2x **Flaps** (sets of 5 dual sided flaps)  
+
 ![Half iso view](/split-flap_counter/Mechanical/Pictures/Half_iso.png "Freecad view of the half assembly with flaps")
 
 Additionnal hardware required:
@@ -31,7 +32,7 @@ Additionnal hardware required:
 - 4x **M3x8** screws for the motor mount
 - 2x limit switches: mine were salvaged from an old industrial grade printer, I don't have the reference, they are similar-ish to Alps SSCTL10400.  
 
-2 ventilation valve stepper motors are used, which are dirt cheap and run of 5V directly. They have a resolution of approx. 2048 steps per turn (in full step mode, not exact !) which is plenty for our application. One drawback is that they are quite slow : I found 5R PM to be a reliable value, i.e. ~12s to complete a revolution. Sliding lever microswitches provide zeroing on each wheel.  
+2 ventilation valve stepper motors are used, which are dirt cheap and run of 5V directly. They have a resolution of approx. 2048 steps per turn (in full step mode, not exact !) which is plenty for our application. One drawback is that they are quite slow: I found 5RPM to be a reliable value, i.e. ~12s to complete a revolution. Sliding lever microswitches provide zeroing on each wheel.  
 
 ### Assembly
 
@@ -46,9 +47,11 @@ The steppers are controlled using an ULN2003 Darlignton driver + an extra NPN si
 
 ### Software
 
-The software was developped in plain low level C and compiled using AVR-GCC and Avrdude. The MCU runs at 4MHz, and the program occupies ~ 500bytes of the 2kb of available program space. Fuse settings: *lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m*  
+The software was developped in plain low level C and compiled using AVR-GCC and Avrdude. The MCU runs at 4MHz, and the program occupies ~ 500 bytes of the 2kB of available program space. Fuse settings: `lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m`  
 Resource allocation:
 - TIMER0: triggers at ~400hz, used for stepper state machine
 - TIMER1: triggers every 8s, used for timekeeping (daily trigger)
 - INT0: "zero" limit switch for the unit wheel. Configured as falling edge interrupt to reset position.
 - INT1: "zero" limit switch for the tens wheel. Configured as falling edge interrupt to reset position.
+
+The zeroing routine ensure a least half a turn of each wheel, even if the wheel was already diplaying a zero, for your enjoyment ☺.
