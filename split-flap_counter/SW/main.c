@@ -1,3 +1,6 @@
+//Attiny2313 running at 4MHz.
+//Fuse settings: -U lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m 
+
 #include <avr/io.h>
 #include<avr/interrupt.h>
 
