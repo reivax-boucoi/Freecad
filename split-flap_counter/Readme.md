@@ -13,11 +13,10 @@ This project was developped in a couple days, mixing 3D printing, electronics an
 
 The hardware was designed using Freecad 0.9 for the mechanical part. 
 It uses multimaterial printing for the digit flaps, and regular PLA prints for the rest. The 2 wheels consist of mirrored parts facing each other, the assembly providing overall support of the drums.
-The base structure was inspired by [Thomas H 3D](https://www.printables.com/model/69603-split-flap-counter-fully-printable) project, his being a single digit purely manual version. The flaps were customized for multi-material printing by [0Celta](https://www.printables.com/model/133058-multi-material-flaps-for-split-flap-counter).
+The base structure was inspired by [Thomas H 3D](https://www.printables.com/model/69603-split-flap-counter-fully-printable) project, his being a single digit purely manual version. The flaps were customized for multi-material printing by [0Celta](https://www.printables.com/model/133058-multi-material-flaps-for-split-flap-counter).  
 
-2 stepper motors are used: 28BYJ-48, which are dirt cheap and run of 5V directly. They have a resolution of 2048 steps per turn (in full step mode) and are driven at ~5RPM, i.e. ~12s to complete a revolution. Sliding lever microswitches provide zeroing on each wheel.  
-
-The printable parts are located in *"split-flap_counter/Mechanical/3mF_exports_toPrint"* :
+A ready made printable of the structure can be found [here](/Mechanical/3mF_exports_toPrint/full_plate.3mF).  
+The individual printable parts are located in [/Mechanical/3mF_exports_toPrint/](/Mechanical/3mF_exports_toPrint/):
 - 2x **Drum**
 - 2x **Drum_end**
 - 2x **Frame** (1 normal, 1 mirrored)
@@ -30,7 +29,9 @@ Additionnal hardware required:
 - 2x **28-BYJ-48** 5V stepper motors
 - 4x **M2x10** screws for the limit switches
 - 4x **M3x8** screws for the motor mount
-- 2x limit switches: mine were salvaged from an old industrial grade printer, I don't have the reference, they are similar-ish to Alps SSCTL10400.
+- 2x limit switches: mine were salvaged from an old industrial grade printer, I don't have the reference, they are similar-ish to Alps SSCTL10400.  
+
+2 ventilation valve stepper motors are used, which are dirt cheap and run of 5V directly. They have a resolution of approx. 2048 steps per turn (in full step mode, not exact !) which is plenty for our application. One drawback is that they are quite slow : I found 5R PM to be a reliable value, i.e. ~12s to complete a revolution. Sliding lever microswitches provide zeroing on each wheel.  
 
 ### Assembly
 
@@ -38,8 +39,9 @@ Additionnal hardware required:
 
 ### Electronics
 
-Kicad 8.0 was used for the electronics (schematic and placement), although the circuit was manually assembled using dead-bug technique later on,because of it's simplicity.
-The project is powered by a 5V supply (>500mA required), which could be ageneric USB wall charger.
+Kicad 8.0 was used for the electronics (schematic and placement), although the circuit was manually assembled using dead-bug technique later on, because of it's simplicity.  
+Nonetheless, a [schematic](/split-flap_counter/Electronics/split_flap_driver/schematic.pdf) and example [layout](/split-flap_counter/Electronics/split_flap_driver/) are available for reference.
+The project is powered by a 5V supply (>500mA required), which could be a generic USB wall charger.
 The steppers are controlled using an ULN2003 Darlignton driver + an extra NPN since I reuqired 8 channels for the 2x4 stepper leads.
 
 ### Software
