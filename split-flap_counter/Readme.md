@@ -43,19 +43,22 @@ Additionnal hardware required:
 Kicad 8.0 was used for the electronics (schematic and placement), although the circuit was manually assembled using dead-bug technique later on, because of it's simplicity. Nonetheless, a [schematic](/split-flap_counter/Electronics/split_flap_driver/schematic.pdf) and example [layout](/split-flap_counter/Electronics/split_flap_driver/) are available for reference.  
 
 The project is powered by a 5V supply (>500mA required), which could be a generic USB wall charger.
-The steppers are controlled using an ULN2003 Darlignton driver + an extra NPN since I required 8 channels for the 2x4 stepper coils. The buttons & limit switches inputs were filtered since the code is interrupt driven and without any debouncing. A hidden button allows manual incrementation for testing purposes.__
+The steppers are controlled using an ULN2003 Darlignton driver + an extra NPN since I required 8 channels for the 2x4 stepper coils. The buttons & limit switches inputs were filtered since the code is interrupt driven and without any debouncing. A hidden button allows manual incrementation for testing purposes.  
 
-The 4MHz crystal oscillator frequency can be dialed in using a trimmer cap to within tens of seconds per day of accuracy, which is sufficient for rough day keeping.
+The 4MHz crystal oscillator frequency can be dialed-in using a trimmer cap to within tens of seconds per day of accuracy, which is sufficient for rough day keeping.
 
 
 ### Software
 
-The software was developped in plain low level C and compiled using AVR-GCC and Avrdude. The MCU runs at 4MHz, and the program occupies ~ 500 bytes of the 2kB of available program space. Fuse settings: `lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m`  
+The software was developped in plain low level C and compiled using AVR-GCC and Avrdude. The MCU runs at 4MHz, and the program occupies ~ 500 bytes of the 2kB of available program space.  
+
+Fuse settings: `lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m`  
+
 Resource allocation:
 - TIMER0: triggers at ~400hz, used for stepper state machine
 - TIMER1: triggers every 8s, used for timekeeping (daily trigger)
 - INT0: "zero" limit switch for the unit wheel. Configured as falling edge interrupt to reset position.
 - INT1: "zero" limit switch for the tens wheel. Configured as falling edge interrupt to reset position.
 
-The zeroing routine ensure a least half a turn of each wheel, even if the wheel was already diplaying a zero, for your enjoyment ☺.__
+The zeroing routine ensure a least half a turn of each wheel, even if the wheel was already diplaying a zero, for your enjoyment ☺.  
 Upon zeroing, the time is also reset such that the display will increment 24 hours after the last reset.
