@@ -50,7 +50,7 @@ The 4MHz crystal oscillator frequency can be dialed-in using a trimmer cap to wi
 
 ### Software
 
-The software was developped in plain low level C and compiled using AVR-GCC and Avrdude (custom Makefile and [precompiled hex](/SW/main.hex) are provided). The MCU runs at 4MHz, and the program occupies ~ 500 bytes of the 2kB of available program space.  
+The software was developped in plain low level C and compiled using AVR-GCC and Avrdude (custom Makefile and [precompiled hex](/split-flap_counter/SW/main.hex) are provided). The MCU runs at 4MHz, and the program occupies ~ 500 bytes of the 2kB of available program space.  
 
 Fuse settings: `lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m`  
 
@@ -63,4 +63,4 @@ Resource allocation:
 The zeroing routine ensure a least half a turn of each wheel, even if the wheel was already diplaying a zero, for your enjoyment ☺.  
 Upon zeroing, the time is also reset such that the display will increment 24 hours after the last reset.
 
-To build the program use the `make` command, and use `make program` to upload it (be sure to specify your programmer in the Makefile *AVRDUDE_PROGRAMMER* field.
+To build the program use the `make` command, and use `make program` to upload it (be sure to specify your programmer in the Makefile *AVRDUDE_PROGRAMMER* field).
