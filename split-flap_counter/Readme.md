@@ -50,12 +50,12 @@ The 4MHz crystal oscillator frequency can be dialed-in using a trimmer cap to wi
 
 ### Software
 
-The software was developped in plain low level C and compiled using AVR-GCC and Avrdude (custom Makefile and [precompiled hex](/split-flap_counter/SW/main.hex) are provided). The MCU runs at 4MHz, and the program occupies ~ 500 bytes of the 2kB of available program space.  
+The software was developped in plain low level C and compiled using AVR-GCC and Avrdude (custom Makefile and [precompiled hex](/split-flap_counter/SW/main.hex) are provided). The MCU runs at 4MHz, and the program occupies 770 bytes of the 2kB of available program space.  
 
 Fuse settings: `lfuse:w:0xfd:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m`  
 
 Resource allocation:
-- TIMER0: triggers at ~400hz, used for stepper state machine
+- TIMER0: triggers at ~400hz, used for stepper state machine and button debouncing.
 - TIMER1: triggers every 8s, used for timekeeping (daily trigger)
 - INT0: "zero" limit switch for the unit wheel. Configured as falling edge interrupt to reset position.
 - INT1: "zero" limit switch for the tens wheel. Configured as falling edge interrupt to reset position.
