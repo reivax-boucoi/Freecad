@@ -12,19 +12,20 @@
 #define LEDR_LOW (PORTD &=~(1<<PIND1))
 #define LEDR_TOGGLE (PORTD ^=(1<<PIND1))
 
-#define BTN1_STATE (PORTD & (1<<PIND4))
-#define BTN2_STATE (PORTD & (1<<PIND6))
+#define BTN1_STATE (PIND & (1<<PIND4))
+#define BTN2_STATE (PIND & (1<<PIND6))
 
 #define STEPPER_TIMER_CNT 155 // 4MHz/64/(155+1) = ~400Hz (stepper pulse rate)
 #define DAILY_TIMER_CNT 31249 // 4MHz/1024/(31249+1=8s
-#define DAILY_TIMER_OVF 5//10800 // 1 day = 10800 * 8s
+#define DAILY_TIMER_OVF 2//10800 // 1 day = 10800 * 8s
 
 #define STEPS_PER_FLAP 202 //2048=full turn, 205 steps per flap
 #define ZERO_STEP_OFFSET 100
 
 #pragma message ("test")
 
-volatile uint8_t stepperState=0;        //Keep track of the stepper driving mode phase.
+volatile uint8_t stepperStateM1=0;        //Keep track of the stepper driving mode phase.
+volatile uint8_t stepperStateM2=0;        //Keep track of the stepper driving mode phase.
 volatile uint16_t remainingStepsM1=2048;  //Keep track of remaining steps to go
 volatile uint16_t remainingStepsM2=2048;  //Keep track of remaining steps to go
 volatile uint16_t timer1OVF_cnt=0;      //Time keeping
@@ -113,19 +114,18 @@ ISR(TIMER0_COMPA_vect){
         }
     }
     
-    if(remainingStepsM1 > 0){
+    
+    if(remainingStepsM1>0){
         remainingStepsM1--;
-        stepperState = ((stepperState & 0x0F) >> 1) | (stepperState & 0xF0);
-        if(stepperState & 0x0F == 0) stepperState = 0x08 | (stepperState & 0xF0);
-        PORTB = (stepperState & 0x0F) | (PORTB & 0xF0);
+        if(--stepperStateM1>3)stepperStateM1=3;
+        PORTB = (1<<stepperStateM1) | (PORTB & 0xF0);
     }else{
-        PORTB &= ~0x0F;
+        PORTB&=~0x0F;
     }
-    if(remainingStepsM2 > 0){
+    if(remainingStepsM2>0){
         remainingStepsM2--;
-        stepperState = ((stepperState & 0xF0) >> 1)|(stepperState & 0x0F);
-        if(stepperState & 0xF0 == 0) stepperState = 0x80 | (stepperState & 0x0F);
-        PORTB = (stepperState & 0xF0) | (PORTB & 0x0F);
+        if(--stepperStateM2>3)stepperStateM2=3;
+        PORTB = (1<<(stepperStateM2+4)) | (PORTB & 0x0F);
     }else{
         PORTB &= ~0xF0;
         LEDR_LOW;
