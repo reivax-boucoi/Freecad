@@ -17,10 +17,10 @@
 
 #define STEPPER_TIMER_CNT 155 // 4MHz/64/(155+1) = ~400Hz (stepper pulse rate)
 #define DAILY_TIMER_CNT 31249 // 4MHz/1024/(31249+1=8s
-#define DAILY_TIMER_OVF 2//10800 // 1 day = 10800 * 8s
+#define DAILY_TIMER_OVF 10800 // 1 day = 10800 * 8s
 
 #define STEPS_PER_FLAP 202 //2048=full turn, 205 steps per flap
-#define ZERO_STEP_OFFSET 100
+#define ZERO_STEP_OFFSET 120
 
 #pragma message ("test")
 
@@ -58,12 +58,11 @@ int main(void){
 
 ISR (INT0_vect){//Unit wheel zero hit
     
-    if(zeroing & 0b01){
-        zeroing &=~ 1;
-        remainingStepsM1 = 2048 - ZERO_STEP_OFFSET;
-    }else{
-        remainingStepsM1 = ZERO_STEP_OFFSET;
-        remainingStepsM2 += STEPS_PER_FLAP;
+    if(zeroing & 0b01)zeroing &=~ 1;
+    remainingStepsM1 = ZERO_STEP_OFFSET;
+        
+    if((zeroing & 0b10)==0b00 && remainingStepsM2==0){
+        remainingStepsM2 = STEPS_PER_FLAP;
         LEDR_HIGH;
     }
 
@@ -72,9 +71,9 @@ ISR (INT0_vect){//Unit wheel zero hit
 ISR (INT1_vect){//Tens wheel zero hit
     if(zeroing & 0b10){
         zeroing &= ~0b10;
-        remainingStepsM2 = 2048 - ZERO_STEP_OFFSET;
+        remainingStepsM2 = 1940;//2048 - ZERO_STEP_OFFSET;
     }else{
-        remainingStepsM2 = ZERO_STEP_OFFSET;
+        remainingStepsM2 = 100;//ZERO_STEP_OFFSET;
     }
 }
 
@@ -82,7 +81,7 @@ ISR (INT1_vect){//Tens wheel zero hit
 ISR (TIMER1_COMPA_vect){// 8s counter for day keeping
     if(++timer1OVF_cnt >= DAILY_TIMER_OVF){
         timer1OVF_cnt = 0;
-        remainingStepsM1 += STEPS_PER_FLAP;
+        remainingStepsM1 = STEPS_PER_FLAP;
     }
 }
 
