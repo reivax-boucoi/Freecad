@@ -48,10 +48,15 @@ int main(void){
     TCCR1B|= (1 << WGM12) | (1 << CS12) | (1 << CS10); // prescaler 1024, clear timer on OCR1A match
     TIMSK |= (1 << OCIE1A)| (1 << OCIE0A);             //Enable Timer compare interrupts
     GIMSK |= (1 << INT1)  | (1 << INT0);               //Enable INT0 & INT1 interrupts
-    MCUCR |= (1 << ISC11) | (1 << ISC01);              //Falling edges generates interrupts
+    MCUCR |= (1<<SE) | (1 << ISC11) | (1 << ISC01);              //Falling edges generates interrupts
+    
+    
+    ACSR=1<<7;  //Disable analog comparator for power saving
+    
     sei();                                              //Global interurpt enable
 
     while(1){
+        __asm__ __volatile__ ( "sleep" "\n\t" :: );
     }
     return 0;
 }     
