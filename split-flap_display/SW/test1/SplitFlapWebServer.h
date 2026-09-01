@@ -90,9 +90,3 @@ class SplitFlapWebServer {
   
 };
 #endif
-//          __
-// (QUACK)>(o )___
-//          ( ._> /
-//           `---'
-// Morgan Manly
-// 07/02/2025

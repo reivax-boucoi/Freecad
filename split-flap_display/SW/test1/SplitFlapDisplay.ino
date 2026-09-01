@@ -1,10 +1,3 @@
-// Split Flap Display
-// Morgan Manly
-// 16/02/2025
-
-// Enter SplitFlapDisplay.cpp to alter number of modules, and set addresses
-// Enjoy :)
-
 #include "Arduino.h" 
 #include "SplitFlapDisplay.h"
 #include "SplitFlapWebServer.h"
