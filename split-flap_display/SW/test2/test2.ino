@@ -2,29 +2,41 @@
 #include "DisplayController.h"
 
 Ticker stepTimer;
+volatile bool stepFlag = false;
+
+uint32_t pTime;
+uint8_t pos=10;
 
 void IRAM_ATTR stepISR() {
-    DisplayController::stepTick = true;
+    stepFlag = true;
 }
 
 void setup() {
 
     Serial.begin(115200);
-
+    Serial.println("Restarted");
     display.begin();
 
-    stepTimer.attach_us(1000000UL / DisplayController::STEPPER_SPEED,stepISR);
+    stepTimer.attach_ms(1000.0 / STEPPER_SPEED,stepISR);
 
-    display.home();
+    //display.home();
 
     // display.write("HELLO", true);
+    pTime=millis();
 }
 
 void loop() {
 
-    if (DisplayController::stepTick) {
-
-        DisplayController::stepTick = false;
+    if (stepFlag) {
+        stepFlag = false;
         display.update();
+    }
+
+    if(millis()>(pTime+5000)){
+        Serial.print("Goto ");
+        Serial.println(pos);
+        display.modules[0].gotoPos(pos);
+        pos=10-pos;
+        pTime=millis();
     }
 }

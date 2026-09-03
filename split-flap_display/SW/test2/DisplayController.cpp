@@ -7,28 +7,27 @@ const char wheelChars[NFLAPS] = {
     '0','1','2','3','4','5','6','7','8','9'
 };
 
-volatile bool DisplayController::stepTick = false;
 
 #if HALF_STEP
 
 static const uint8_t seq[8] = {
-    0b0111,
-    0b0011,
-    0b1011,
-    0b1001,
-    0b1101,
+    0b1000,
     0b1100,
-    0b1110,
-    0b0110
+    0b0100,
+    0b0110,
+    0b0010,
+    0b0011,
+    0b0001,
+    0b1001
 };
 
 #else
 
 static const uint8_t seq[4] = {
-    0b0111,
-    0b1011,
-    0b1101,
-    0b1110
+    0b0100,
+    0b1000,
+    0b0001,
+    0b0010
 };
 
 #endif
@@ -118,7 +117,7 @@ void DisplayModule::update(bool hall) {
 }
 
 uint8_t DisplayModule::getOutputNibble() const {
-    if (!enabled)return 0x0F;
+    if (!enabled)return 0x0;
     return seq[phase];
 }
 
@@ -146,7 +145,7 @@ void DisplayController::begin() {
     digitalWrite(STROBE_out, LOW);
     digitalWrite(MOTOR_out, LOW);
 
-    shiftOUTData(motors);
+    shiftData(motors);
 }
 
 void DisplayController::home() {
@@ -179,40 +178,39 @@ void DisplayController::write(const char *txt, bool center) {
 
 void DisplayController::update() {
 
-    halls = shiftINData();
-    for (uint8_t i = 0; i < NMODULE; i++)
-        modules[i].update((halls >> i) & 1);
-
     motors = 0;
     for (uint8_t i = 0; i < NMODULE; i++)
         motors |= (uint32_t)modules[i].getOutputNibble() << (i * 4);
-    shiftOUTData(motors);
+
+    halls = shiftData(motors);
+
+    for (uint8_t i = 0; i < NMODULE; i++)
+        modules[i].update((halls >> i) & 1);
+
+    //Serial.println("motorPos\ttargetPos\tenabled");
+    /*if(modules[0].enabled){
+    Serial.print(modules[0].motorPos);
+    Serial.print("\t");
+    Serial.print(modules[0].targetPos);
+    Serial.print("\t");
+    Serial.print(modules[0].phase);
+    Serial.print("\t");
+    Serial.println(motors,BIN);
+    }*/
 }
 
-void DisplayController::shiftOUTData(uint32_t d) {
-
-    digitalWrite(STROBE_out, LOW);
-    for (uint8_t i = 0; i < NMODULE * 4; i++) {
-
-        digitalWrite(MOTOR_out, (d >> i) & 1);
-        digitalWrite(CLK_out, HIGH);
-        digitalWrite(CLK_out, LOW);
-    }
-    digitalWrite(STROBE_out, HIGH);
-}
-
-uint8_t DisplayController::shiftINData() {
-
+uint8_t DisplayController::shiftData(uint32 d) {
     uint8_t res = 0;
     digitalWrite(STROBE_out, LOW);
-    digitalWrite(STROBE_out, HIGH);
-    for (uint8_t i = 0; i < 8; i++) {
+    for (uint8_t i = 0; i < NMODULE * 4; i++) {
+        if (i<8 && digitalRead(HALL_in)) {
+            res |= (1 << i);
+        }
+        digitalWrite(MOTOR_out, (d >> i) & 0x000001);
         digitalWrite(CLK_out, HIGH);
         digitalWrite(CLK_out, LOW);
-        if (digitalRead(HALL_in))
-            res |= (1 << i);
     }
-    return res - 192;
+    digitalWrite(STROBE_out, HIGH);
+    return res;
 }
-
 DisplayController display;
