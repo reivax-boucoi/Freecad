@@ -1,5 +1,8 @@
 #include "SplitFlapModule.h"
 
+const char* ssid = "Freebox-6156D2";
+const char* password = "b32r9q69r5qxx67kqt5746";
+
 #define HALL_in     12  //GPIO12, conected to 74HC597 QH output (pin 9)
 #define CLK_out     13  //GPIO13, connected to 74HC597 CLK and SCK (pins 12,11) and MIC59P60 CLK (pins 3)
 #define STROBE_out  4   //GPIO4, connected to 74HC597 SLoad (pin 13, active low) and MIC59P60 STROBE (pins 8, latch when high)
@@ -8,10 +11,8 @@
 #define NMODULE     6
 #define IDLE_TIME 1000
 
-const char* ssid = "Freebox-6156D2";
-const char* password = "b32r9q69r5qxx67kqt5746";
 uint8_t halls = 0;
-uint32_t motors = 0xFFFFFF; // <<MSB=OUT8 chip near ESP. >>LSB OUT1 edge chip
+uint32_t motors = 0xFFFFFF; // <<MSB=OUT8 chip near ESP (left most display). >>LSB OUT1 edge chip (right most display)
 uint64_t pTime;
 
 void shiftOUTData(uint32 d) {
@@ -25,7 +26,7 @@ void shiftOUTData(uint32 d) {
   digitalWrite(STROBE_out, HIGH);
 }
 
-uint8_t shiftINData() {
+uint8_t shiftINData() { // returns hall effect sensor data (LSB=right most display, 6th bit=left most display
   uint8_t res = 0;
   for (uint8_t i = 0; i < 8; i++) {
     digitalWrite(CLK_out, HIGH);
@@ -48,7 +49,8 @@ void setup() {
   digitalWrite(STROBE_out, LOW);
   digitalWrite(MOTOR_out, LOW);
 
-  halls = shiftOUTData(motors);
+  shiftOUTData(motors);
+  halls = shiftINData();
   pTime = millis();
 }
 
@@ -70,5 +72,4 @@ void loop() {
 
     pTime = millis();
   }
-
 }
